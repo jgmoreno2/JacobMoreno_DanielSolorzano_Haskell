@@ -5,7 +5,7 @@ mkBoard n = mkBoardHelper n []
 
 mkBoardHelper :: Int -> [[Int]] -> [[Int]]
 mkBoardHelper n board
-    | length board < n = mkBoardHelper n [addRow n]++board
+    | length board < n = mkBoardHelper n (addRow n : board)
     | otherwise = board
 
 addRow :: Int -> [Int]
@@ -13,7 +13,7 @@ addRow n = addRowHelper n []
 
 addRowHelper :: Int -> [Int] -> [Int]
 addRowHelper n tmpRow
-    | length tmpRow < n = addRowHelper n [0]++tmpRow
+    | length tmpRow < n = addRowHelper n (0 : tmpRow)
     | otherwise = tmpRow
 
 mkPlayer :: Int
