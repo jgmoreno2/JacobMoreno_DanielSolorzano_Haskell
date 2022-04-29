@@ -1,3 +1,5 @@
+import Data.Char
+
 mkBoard :: Int -> [[Int]]
 mkBoard n = mkBoardHelper n []
 
@@ -114,3 +116,36 @@ checkAboveRight x y board player = isMarkedBy (x+1) (y+1) board player && isMark
 checkBelow :: Int -> Int -> [[Int]] -> Int -> Bool
 checkBelow x y board player = isMarkedBy x (y+1) board player && isMarkedBy x (y+2) board player && isMarkedBy x (y+3) board player && isMarkedBy x (y+4) board player
 
+isDraw :: [[Int]] -> Bool
+isDraw board = not (isWonBy board mkPlayer || isWonBy board mkOpponent) && isFull board
+
+isGameOver :: [[Int]] -> Bool
+isGameOver board = isWonBy board mkPlayer || isWonBy board mkOpponent || isDraw board
+
+boardToStr :: (Int -> Char) -> [[Int]] -> String
+boardToStr playerToChar board = boardToStrHelper playerToChar board 0 0 ""
+
+boardToStrHelper :: (Int -> Char) -> [[Int]] -> Int -> Int-> String -> String
+boardToStrHelper playerToChar board x y currString
+    | y == 0 = boardToStrHelper playerToChar board 0 1 (getFirstRows "" (length board) 0 0 board)
+    | y <= length board && x == 0 = boardToStrHelper playerToChar board 1 y (currString ++ ['\n', intToDigit (mod y 10), '|', ' ', playerToChar (getTileAt x (y-1) board)])
+    | y <= length board && x < length board = boardToStrHelper playerToChar board (x+1) y (currString ++ [' ', playerToChar (getTileAt x (y-1) board)])
+    | y <= length board = boardToStrHelper playerToChar board 0 (y+1) currString
+    | otherwise = currString
+
+getFirstRows :: String -> Int -> Int -> Int -> [[Int]] -> String
+getFirstRows currString len x y board
+    | y == 0 && x == 0 = getFirstRows " x 1" len 1 0 board
+    | y == 0 && x < len = getFirstRows (currString ++ [' ', intToDigit (mod (x+1) 10)]) len (x+1) 0 board
+    | y == 0 = getFirstRows (currString ++ "\ny --") len 1 1 board
+    | y == 1 && x < len = getFirstRows (currString ++ "--") len (x+1) 1 board
+    | otherwise = currString
+
+convertTile :: Int -> Char
+convertTile player
+    | player == mkPlayer = 'X'
+    | player == mkOpponent = 'O'
+    | otherwise = '.'
+
+main :: IO ()
+main = putStrLn (boardToStr convertTile (mkBoard 15))
