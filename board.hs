@@ -86,17 +86,31 @@ isFullRowHelper y tmpRow fullTracker
 
 isWonBy :: [[Int]] -> Int -> Bool
 isWonBy board player  = result where
-    winningRow = getWinningRow x y board player
+    winningRow = getWinningRow 0 0 board player []
     result = not (null winningRow)
 
-getWinningRow :: Int -> Int -> [[Int]] -> Int -> [Int]
-getWinningRow x y board player
+getWinningRow :: Int -> Int -> [[Int]] -> Int -> [Int] -> [Int]
+getWinningRow x y board player winner
+    | not (null winner) = winner
     | x >= length board && y >= length board = []
-    | otherwise = result where
-        winningRow = []
-        if isMarkedBy x y board player && x < (length board) - 4 && checkRight x y board player
-            then winningRow = [x, y, x+1, y, x+2, y, x+3, y, x+4, y]
-        else winningRow = winningRow
-    
+    | y >= length board = getWinningRow (x+1) 0 board player []
+    | otherwise = getWinningRow x (y+1) board player winningRow where
+        winningRow
+          | isMarkedBy x y board player && x < length board - 4 && checkRight x y board player = [x, y, x+1, y, x+2, y, x+3, y, x+4, y]
+          | isMarkedBy x y board player && x > 3 && y < length board - 4 && checkAboveLeft x y board player = [x, y, x-1, y+1, x-2, y+2, x-3, y+3, x-4, y+4]
+          | isMarkedBy x y board player && x < length board - 4 && y < length board - 4 && checkAboveRight x y board player = [x, y, x+1, y+1, x+2, y+2, x+3, y+3, x+4, y+4]
+          | isMarkedBy x y board player && y < length board - 4 && checkBelow x y board player = [x, y, x, y+1, x, y+2, x, y+3, x, y+4]
+          | otherwise = []
+
 checkRight :: Int -> Int -> [[Int]] -> Int -> Bool
-checkRight x y board player = True
+checkRight x y board player = isMarkedBy (x+1) y board player && isMarkedBy (x+2) y board player && isMarkedBy (x+3) y board player && isMarkedBy (x+4) y board player
+
+checkAboveLeft :: Int -> Int -> [[Int]] -> Int -> Bool
+checkAboveLeft x y board player = isMarkedBy (x-1) (y+1) board player && isMarkedBy (x-2) (y+2) board player && isMarkedBy (x-3) (y+3) board player && isMarkedBy (x-4) (y+4) board player
+
+checkAboveRight :: Int -> Int -> [[Int]] -> Int -> Bool
+checkAboveRight x y board player = isMarkedBy (x+1) (y+1) board player && isMarkedBy (x+2) (y+2) board player && isMarkedBy (x+3) (y+3) board player && isMarkedBy (x+4) (y+4) board player
+
+checkBelow :: Int -> Int -> [[Int]] -> Int -> Bool
+checkBelow x y board player = isMarkedBy x (y+1) board player && isMarkedBy x (y+2) board player && isMarkedBy x (y+3) board player && isMarkedBy x (y+4) board player
+
